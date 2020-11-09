@@ -1062,6 +1062,26 @@ var LibraryEmbind = {
 #endif
   },
 
+#if USE_LEGACY_DYNCALLS || !WASM_BIGINT
+  // Used in library code to get JS function from wasm function pointer.
+  // All callers should use direct table access where possible and only fall
+  // back to this function if needed.
+  $getDynCaller__deps: ['$dynCall'],
+  $getDynCaller: function(sig, ptr) {
+#if !USE_LEGACY_DYNCALLS
+    assert(sig.indexOf('j') >= 0, 'getDynCaller should only be called with i64 sigs')
+#endif
+    var argCache = [];
+    return function() {
+      argCache.length = arguments.length;
+      for (var i = 0; i < arguments.length; i++) {
+        argCache[i] = arguments[i];
+      }
+      return dynCall(sig, ptr, argCache);
+    };
+  },
+#endif
+
   $embind__requireFunction__deps: ['$readLatin1String', '$throwBindingError'
 #if USE_LEGACY_DYNCALLS || !WASM_BIGINT
     , '$getDynCaller'

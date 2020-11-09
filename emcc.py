@@ -1378,7 +1378,6 @@ There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR P
       # See: https://github.com/emscripten-core/emscripten/issues/12065
       # See: https://github.com/emscripten-core/emscripten/issues/12066
       shared.Settings.USE_LEGACY_DYNCALLS = 1
-      shared.Settings.DEFAULT_LIBRARY_FUNCS_TO_INCLUDE += ['$getDynCaller']
       shared.Settings.EXPORTED_FUNCTIONS += ['_emscripten_stack_get_base',
                                              '_emscripten_stack_get_end',
                                              '_emscripten_stack_set_limits']
@@ -1607,17 +1606,11 @@ There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR P
     if not shared.Settings.MINIMAL_RUNTIME or shared.Settings.EXIT_RUNTIME:
       # MINIMAL_RUNTIME only needs callRuntimeCallbacks in certain cases, but the normal runtime
       # always does.
-      shared.Settings.DEFAULT_LIBRARY_FUNCS_TO_INCLUDE += ['$callRuntimeCallbacks', '$dynCall']
+      shared.Settings.DEFAULT_LIBRARY_FUNCS_TO_INCLUDE += ['$callRuntimeCallbacks']
 
     if shared.Settings.USE_PTHREADS:
       # memalign is used to ensure allocated thread stacks are aligned.
       shared.Settings.EXPORTED_FUNCTIONS += ['_memalign']
-
-      # dynCall is used to call pthread entry points in worker.js (as
-      # metadce does not consider worker.js, which is external, we must
-      # consider it an export, i.e., one which can never be removed).
-      shared.Settings.DEFAULT_LIBRARY_FUNCS_TO_INCLUDE += ['$dynCall']
-      shared.Settings.EXPORTED_FUNCTIONS += ['dynCall']
 
       if shared.Settings.MINIMAL_RUNTIME:
         building.user_requested_exports += ['exit']
