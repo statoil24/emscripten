@@ -856,8 +856,6 @@ There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR P
     shared.check_sanity(force=True)
     return code
 
-  shared.check_sanity(force=DEBUG)
-
   if '-dumpmachine' in args:
     print(shared.get_llvm_target())
     return 0
@@ -872,15 +870,14 @@ There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR P
     with misc_temp_files.get_file(suffix='.o') as temp_target:
       input_file = 'hello_world.c'
       cmd = [shared.PYTHON, sys.argv[0], shared.path_from_root('tests', input_file), '-v', '-c', '-o', temp_target] + args
-      proc = run_process(cmd, stderr=PIPE, check=False)
-      if proc.returncode != 0:
-        print(proc.stderr)
-        exit_with_error('error getting cflags')
+      proc = shared.check_call(cmd, stderr=PIPE)
       lines = [x for x in proc.stderr.splitlines() if clang in x and input_file in x]
       parts = shlex.split(lines[0].replace('\\', '\\\\'))
       parts = [x for x in parts if x not in ['-c', '-o', '-v', '-emit-llvm'] and input_file not in x and temp_target not in x]
       print(shared.shlex_join(parts[1:]))
     return 0
+
+  shared.check_sanity(force=DEBUG)
 
   def get_language_mode(args):
     return_next = False
